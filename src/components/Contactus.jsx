@@ -1,69 +1,69 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { Phone, Mail, Send, Loader2, Check } from 'lucide-react'
-import { Alert, AlertDescription } from "./ui/alert"
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
-import { Textarea } from "./ui/textarea"
+import React, { useState } from "react";
+import { Phone, Mail, Send, Loader2, Check } from "lucide-react";
+import { Alert, AlertDescription } from "./ui/alert";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
 
 export default function Component() {
   const [formState, setFormState] = useState({
-    email: '',
-    phone: '',
-    name: '',
-    message: ''
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState(null)
-  const [errors, setErrors] = useState({})
+    email: "",
+    phone: "",
+    name: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+  const [errors, setErrors] = useState({});
 
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors = {};
     if (!formState.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      newErrors.email = 'Please enter a valid email address'
+      newErrors.email = "Please enter a valid email address";
     }
     if (!formState.name.trim()) {
-      newErrors.name = 'Name is required'
+      newErrors.name = "Name is required";
     }
     if (!formState.message.trim()) {
-      newErrors.message = 'Message is required'
+      newErrors.message = "Message is required";
     }
     if (formState.phone && !formState.phone.match(/^\+?[\d\s-]{10,}$/)) {
-      newErrors.phone = 'Please enter a valid phone number'
+      newErrors.phone = "Please enter a valid phone number";
     }
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!validateForm()) return
+    e.preventDefault();
+    if (!validateForm()) return;
 
-    setIsSubmitting(true)
-    setSubmitStatus(null)
+    setIsSubmitting(true);
+    setSubmitStatus(null);
 
     // Simulate API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      setSubmitStatus('success')
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      setSubmitStatus("success");
       // Reset form after success
-      setFormState({ email: '', phone: '', name: '', message: '' })
+      setFormState({ email: "", phone: "", name: "", message: "" });
     } catch (error) {
-      setSubmitStatus('error')
+      setSubmitStatus("error");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormState(prev => ({ ...prev, [name]: value }))
+    const { name, value } = e.target;
+    setFormState((prev) => ({ ...prev, [name]: value }));
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }))
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1a1a1a] to-black text-white font-['Playfair_Display'] pb-12">
@@ -82,7 +82,7 @@ export default function Component() {
           {/* Main Contact Form */}
           <div className="lg:col-span-2">
             <div className="bg-zinc-900/80 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-2xl border border-zinc-800/50">
-              {submitStatus === 'success' && (
+              {submitStatus === "success" && (
                 <Alert className="mb-6 bg-green-600/20 border-green-500 text-green-200">
                   <Check className="h-4 w-4" />
                   <AlertDescription>
@@ -91,7 +91,7 @@ export default function Component() {
                 </Alert>
               )}
 
-              {submitStatus === 'error' && (
+              {submitStatus === "error" && (
                 <Alert className="mb-6 bg-red-600/20 border-red-500 text-red-200">
                   <AlertDescription>
                     Something went wrong. Please try again later.
@@ -109,11 +109,13 @@ export default function Component() {
                       onChange={handleInputChange}
                       placeholder="Email"
                       className={`w-full p-4 rounded-2xl bg-zinc-800/50 backdrop-blur-sm border ${
-                        errors.email ? 'border-red-500' : 'border-zinc-700'
+                        errors.email ? "border-red-500" : "border-zinc-700"
                       } focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all duration-300 placeholder-zinc-500`}
                     />
                     {errors.email && (
-                      <p className="text-red-500 text-sm pl-2">{errors.email}</p>
+                      <p className="text-red-500 text-sm pl-2">
+                        {errors.email}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -124,11 +126,13 @@ export default function Component() {
                       onChange={handleInputChange}
                       placeholder="Phone (optional)"
                       className={`w-full p-4 rounded-2xl bg-zinc-800/50 backdrop-blur-sm border ${
-                        errors.phone ? 'border-red-500' : 'border-zinc-700'
+                        errors.phone ? "border-red-500" : "border-zinc-700"
                       } focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all duration-300 placeholder-zinc-500`}
                     />
                     {errors.phone && (
-                      <p className="text-red-500 text-sm pl-2">{errors.phone}</p>
+                      <p className="text-red-500 text-sm pl-2">
+                        {errors.phone}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -141,7 +145,7 @@ export default function Component() {
                     onChange={handleInputChange}
                     placeholder="Name"
                     className={`w-full p-4 rounded-2xl bg-zinc-800/50 backdrop-blur-sm border ${
-                      errors.name ? 'border-red-500' : 'border-zinc-700'
+                      errors.name ? "border-red-500" : "border-zinc-700"
                     } focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all duration-300 placeholder-zinc-500`}
                   />
                   {errors.name && (
@@ -157,11 +161,13 @@ export default function Component() {
                     placeholder="Message"
                     rows={6}
                     className={`w-full p-4 rounded-2xl bg-zinc-800/50 backdrop-blur-sm border ${
-                      errors.message ? 'border-red-500' : 'border-zinc-700'
+                      errors.message ? "border-red-500" : "border-zinc-700"
                     } focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all duration-300 resize-none placeholder-zinc-500`}
                   />
                   {errors.message && (
-                    <p className="text-red-500 text-sm pl-2">{errors.message}</p>
+                    <p className="text-red-500 text-sm pl-2">
+                      {errors.message}
+                    </p>
                   )}
                 </div>
 
@@ -169,7 +175,7 @@ export default function Component() {
                   type="submit"
                   disabled={isSubmitting}
                   className={`w-full sm:w-auto px-8 py-4 bg-red-600 rounded-xl hover:bg-red-700 transition-all duration-300 flex items-center justify-center gap-2 ${
-                    isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+                    isSubmitting ? "opacity-75 cursor-not-allowed" : ""
                   }`}
                 >
                   {isSubmitting ? (
@@ -192,12 +198,12 @@ export default function Component() {
             <div className="bg-zinc-900/80 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-2xl border border-zinc-800/50 h-full">
               <h2 className="text-2xl font-bold mb-4">Our Newsletter</h2>
               <p className="text-zinc-400 mb-6">
-                Stay updated with our latest vehicle history reports and industry insights.
-                We send updates weekly.
+                Stay updated with our latest vehicle history reports and
+                industry insights. We send updates weekly.
               </p>
-              <div className="space-y-4">
+              <div className="space-y-4 ">
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-zinc-500 w-5 h-5" />
+                  <Mail className="relative left-4 top-1/2 transform -translate-y-1/2 text-zinc-500 w-5 h-5" />
                   <Input
                     type="email"
                     placeholder="Enter your email"
@@ -209,12 +215,16 @@ export default function Component() {
                 </Button>
               </div>
             </div>
-            <div className='w-full h-auto mt-6'>
-              <img src="https://wheelrecords.com/wp-content/uploads/brown-car.webp" alt="Brown car" className='w-full h-auto rounded-3xl sm:hidden' />
+            <div className="w-[35vw] h-[35vh] -mt-10 relative ">
+              <img
+                src="https://wheelrecords.com/wp-content/uploads/brown-car.webp"
+                alt="Brown car"
+                className="hidden md:block w-full h-auto rounded-3xl"
+              />
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

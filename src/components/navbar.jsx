@@ -8,19 +8,14 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Update active section based on URL or scroll position
   useEffect(() => {
-    // Get section from URL query params
     const params = new URLSearchParams(location.search);
     const sectionParam = params.get('section');
     
     if (location.pathname === '/') {
-      // If we're on home page, update active section from URL or default to 'home'
       setActiveSection(sectionParam || 'home');
-      
-      // Add scroll observer
       const handleScroll = () => {
-        const sections = ['home', 'about', 'plans', 'testimonials', 'contact'];
+        const sections = ['home', 'about', 'plans', 'testimonials', 'Why Us', 'contact'];
         for (const sectionId of sections) {
           const element = document.getElementById(sectionId);
           if (element) {
@@ -32,7 +27,6 @@ const Header = () => {
           }
         }
       };
-
       window.addEventListener('scroll', handleScroll);
       return () => window.removeEventListener('scroll', handleScroll);
     }
@@ -44,7 +38,6 @@ const Header = () => {
 
   const handleLinkClick = (path) => {
     setIsMenuOpen(false);
-    
     if (location.pathname === '/') {
       const section = document.getElementById(path.toLowerCase());
       if (section) {
@@ -58,7 +51,7 @@ const Header = () => {
 
   const isActive = (path) => {
     if (path === '/cart') {
-      return location.pathname === '/cart';
+      return location.pathname.startsWith('/cart');
     }
     return path.toLowerCase() === activeSection;
   };
@@ -116,8 +109,7 @@ const Header = () => {
                       ? 'text-red-500 font-semibold' 
                       : 'text-gray-300 hover:text-white'
                   } group
-                `}
-              >
+                `}>
                 {link.name}
                 <span className={`
                   absolute bottom-0 left-0 w-full h-0.5 
@@ -129,7 +121,6 @@ const Header = () => {
                 `}/>
               </button>
             ))}
-
             {/* Cart Link */}
             <Link 
               to="/cart" 
@@ -137,7 +128,7 @@ const Header = () => {
                 relative text-gray-300 hover:text-white transition-colors focus:outline-none p-2 rounded-full ${
                   isActive('/cart') ? 'text-red-500' : ''
                 }
-              `}
+              `} 
               aria-label="Shopping cart"
             >
               <ShoppingCart 
@@ -151,5 +142,6 @@ const Header = () => {
     </header>
   );
 };
+
 
 export default Header;

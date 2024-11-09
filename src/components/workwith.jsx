@@ -166,7 +166,7 @@ const MarqueeGroup = ({ items, type, direction = 'left', speed = 20 }) => {
 const AnimatedShowcase = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-[#191919] text-white">
-      <div className="relative w-full pt-16 pb-32 overflow-hidden">
+      <div className="relative w-full pt-16 pb-10 overflow-hidden">
         <div className="bg-red-500 absolute"></div>
 
         <main>
@@ -194,7 +194,7 @@ const AnimatedShowcase = () => {
             </div>
           </section>
 
-          <section className="mb-24">
+          <section className="mb-10">
             <header className="flex items-center justify-center gap-4 mb-12">
               <Car className="w-14 h-14 text-red-500" />
               <h2 className="text-2xl md:text-3xl font-semibold text-center sm:text-5xl lg:text-7xl font-serif tracking-tight text-white">
@@ -207,8 +207,7 @@ const AnimatedShowcase = () => {
           </section>
         </main>
       </div>
-
-      <style jsx global>{`
+      <style jsx="true" global="true">{`
         // global styles
       `}</style>
     </div>

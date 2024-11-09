@@ -13,7 +13,7 @@ const AnimatedFooter = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style jsx="true" global="true">{`
         @keyframes marquee-left {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }

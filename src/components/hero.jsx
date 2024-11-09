@@ -1,10 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, lazy, Suspense } from 'react';
 import { ArrowRightCircle, ChevronDown, Search, Info, CheckCircle2, XCircle } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { vinValidation } from './ui/VinValidator';
 
-export default function HeroSection() {
+// Memoized components for better performance
+const ScrollIndicator = memo(({ onClick }) => (
+  <div 
+    className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center cursor-pointer opacity-0 animate-fade-in"
+    onClick={onClick}
+  >
+    <div className="w-6 h-10 border-2 border-white/50 rounded-full relative flex justify-center mb-2 animate-bounce">
+      <div className="w-1 h-2 bg-white rounded-full absolute top-2 animate-scroll" />
+    </div>
+    <ChevronDown className="w-5 h-5 text-white/70" />
+  </div>
+));
+
+const ValidationIcon = memo(({ isValid, hasValue }) => {
+  if (!hasValue) return null;
+  return isValid ? 
+    <CheckCircle2 className="w-5 h-5 text-green-500" /> : 
+    <XCircle className="w-5 h-5 text-red-500" />;
+});
+
+const ErrorMessage = memo(({ message }) => {
+  if (!message) return null;
+  return (
+    <p className="text-red-500 text-sm mt-1 animate-slide-up">
+      {message}
+    </p>
+  );
+});
+
+// Lazy loaded image component
+const LazyImage = lazy(() => Promise.resolve({
+  default: ({ src, alt, className }) => (
+    <img 
+      src={src} 
+      alt={alt} 
+      className={className} 
+      loading="lazy"
+    />
+  )
+}));
+
+const HeroSection = () => {
   const [email, setEmail] = useState('');
   const [vin, setVin] = useState('');
   const [vinError, setVinError] = useState('');
@@ -12,55 +52,48 @@ export default function HeroSection() {
   const [error, setError] = useState('');
   const [showScroll, setShowScroll] = useState(true);
   const [isVinValid, setIsVinValid] = useState(false);
-
-  // Scroll animation setup
-  const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 300], [0, 150]);
-  const opacity = useTransform(scrollY, [0, 300], [1, 0]);
+  const [hasScrolled, setHasScrolled] = useState(false);
 
   useEffect(() => {
-    // Initialize Chatra
-    window.ChatraID = 'jy2JDPvzX4ApjnAY2';
-    window.Chatra = window.Chatra || function() {
-      (window.Chatra.q = window.Chatra.q || []).push(arguments);
-    };
-
-    // Create and load the Chatra script
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://call.chatra.io/chatra.js';
-    document.head.appendChild(script);
-
-    // Cleanup function
-    return () => {
-      // Remove the script tag
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
-      // Cleanup Chatra
-      delete window.ChatraID;
-      delete window.Chatra;
-    };
-  }, []);
-
-  useEffect(() => {
+    // Optimized scroll handler with debounce
+    let timeoutId;
     const handleScroll = () => {
-      setShowScroll(window.scrollY <= 100);
+      if (timeoutId) {
+        window.cancelAnimationFrame(timeoutId);
+      }
+      
+      timeoutId = window.requestAnimationFrame(() => {
+        setShowScroll(window.scrollY <= 100);
+        setHasScrolled(window.scrollY > 0);
+      });
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (timeoutId) {
+        window.cancelAnimationFrame(timeoutId);
+      }
+    };
   }, []);
 
-  // Rest of the component code remains the same...
+  // Optimized Chatra initialization
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.ChatraID) {
+      window.ChatraID = 'jy2JDPvzX4ApjnAY2';
+      const script = document.createElement('script');
+      script.async = true;
+      script.defer = true;
+      script.src = 'https://call.chatra.io/chatra.js';
+      document.head.appendChild(script);
+    }
+  }, []);
+
   const handleVinChange = (e) => {
     const formattedVin = vinValidation.formatVin(e.target.value);
     setVin(formattedVin);
-    
-    // Clear previous errors
     setVinError('');
     
-    // Validate VIN as user types
     if (formattedVin.length > 0) {
       const error = vinValidation.getVinError(formattedVin);
       setVinError(error);
@@ -72,9 +105,7 @@ export default function HeroSection() {
 
   const scrollToContent = () => {
     const plansSection = document.getElementById('plans');
-    if (plansSection) {
-      plansSection.scrollIntoView({ behavior: 'smooth' });
-    }
+    plansSection?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleSubmit = async (e) => {
@@ -95,103 +126,57 @@ export default function HeroSection() {
     }
 
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const plansSection = document.getElementById('plans');
-    if (plansSection) {
-      plansSection.scrollIntoView({ behavior: 'smooth' });
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const plansSection = document.getElementById('plans');
+      plansSection?.scrollIntoView({ behavior: 'smooth' });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
-  // Animation variants remain the same...
-  const sectionVariants = {
-    hidden: {
-      opacity: 0,
-      y: 50,
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut",
-        when: "beforeChildren",
-        staggerChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  // JSX remains exactly the same...
   return (
     <div className="relative min-h-screen w-full overflow-hidden font-sans">
-      {/* Background with Parallax */}
-      <motion.div 
-        style={{ y }}
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        initial={{ scale: 1.1 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 1 }}
+      {/* Optimized background with CSS-based parallax */}
+      <div 
+        className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 ${
+          hasScrolled ? 'scale-105' : 'scale-100'
+        }`}
+        style={{
+          backgroundImage: `url('https://i.ibb.co/xgYcZpt/freepik-export-20241102153720-XRIF.png')`
+        }}
       >
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url('https://i.ibb.co/xgYcZpt/freepik-export-20241102153720-XRIF.png')`
-          }}
-        >
-          <motion.div 
-            style={{ opacity }}
-            className="absolute inset-0 bg-gradient-to-br from-black/90 via-black/80 to-black/70 mix-blend-multiply"
-          />
-          <div className="absolute inset-0 bg-black/40" />
-        </div>
-      </motion.div>
+        <div className="absolute inset-0 bg-gradient-to-br from-black/90 via-black/80 to-black/70 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
 
       {/* Main Content */}
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
-          variants={sectionVariants}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col lg:flex-row min-h-screen items-center gap-8 lg:gap-12"
-        >
+        <div className="flex flex-col lg:flex-row min-h-screen items-center gap-8 lg:gap-12 animate-fade-in">
           {/* Left Content */}
           <div className="w-full lg:w-1/2 pt-20 lg:pt-0">
-            <motion.div variants={itemVariants} className="space-y-6">
-              <motion.div variants={itemVariants} className="inline-block px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 rounded-full shadow-lg mt-20">
+            <div className="space-y-6">
+              <div className="inline-block px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 rounded-full shadow-lg mt-20">
                 <span className="text-white text-sm font-semibold tracking-wider">
                   PROFESSIONAL CAR INSPECTION
                 </span>
-              </motion.div>
+              </div>
 
-              <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
                 <span className="text-white">Comprehensive</span>
                 <br />
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-700">
                   Vehicle Care
                 </span>
-              </motion.h1>
+              </h1>
 
-              <motion.p variants={itemVariants} className="text-lg text-gray-300 max-w-xl">
+              <p className="text-lg text-gray-300 max-w-xl">
                 Delivering expert maintenance and repair services to ensure your vehicle operates at its best.
-              </motion.p>
+              </p>
 
               <Card className="bg-gray-900/50 backdrop-blur-lg border-gray-800">
                 <CardContent className="p-6">
                   <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* VIN Input */}
                     <div>
                       <label htmlFor="vin" className="text-gray-300 text-sm font-medium block mb-2 mt-2">
                         VIN Number
@@ -202,7 +187,7 @@ export default function HeroSection() {
                           id="vin"
                           value={vin}
                           onChange={handleVinChange}
-                          className={`w-full bg-gray-800/30 border text-white px-4 py-3 rounded-lg focus:outline-none transition-all pr-10 ${
+                          className={`w-full bg-gray-800/30 border text-white px-4 py-3 rounded-lg focus:outline-none transition-colors pr-10 ${
                             vinError 
                               ? 'border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
                               : isVinValid 
@@ -213,27 +198,12 @@ export default function HeroSection() {
                           maxLength={17}
                         />
                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                          {vin && (
-                            isVinValid ? (
-                              <CheckCircle2 className="w-5 h-5 text-green-500" />
-                            ) : (
-                              <XCircle className="w-5 h-5 text-red-500" />
-                            )
-                          )}
+                          <ValidationIcon isValid={isVinValid} hasValue={vin.length > 0} />
                         </div>
                       </div>
-                      {vinError && (
-                        <motion.p
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="text-red-500 text-sm mt-1"
-                        >
-                          {vinError}
-                        </motion.p>
-                      )}
+                      <ErrorMessage message={vinError} />
                     </div>
 
-                    {/* Email Input */}
                     <div>
                       <label htmlFor="email" className="text-gray-300 text-sm font-medium block mb-2">
                         Email Address
@@ -243,16 +213,15 @@ export default function HeroSection() {
                         id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-gray-800/30 border border-gray-700/50 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
+                        className="w-full bg-gray-800/30 border border-gray-700/50 text-white px-4 py-3 rounded-lg focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-colors"
                         placeholder="Enter your email"
                       />
                     </div>
 
-                    {/* Submit Button */}
                     <button
                       type="submit"
                       disabled={isLoading || !isVinValid}
-                      className={`w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4 rounded-lg transition-all font-medium flex items-center justify-center gap-2 ${
+                      className={`w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4 rounded-lg transition-colors font-medium flex items-center justify-center gap-2 ${
                         isLoading || !isVinValid 
                           ? 'opacity-50 cursor-not-allowed' 
                           : 'hover:from-red-700 hover:to-red-800'
@@ -274,21 +243,12 @@ export default function HeroSection() {
                       )}
                     </button>
 
-                    {/* Error Message */}
-                    <AnimatePresence>
-                      {error && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                          className="text-sm text-red-500 bg-red-500/10 p-3 rounded-lg border border-red-500/60"
-                        >
-                          {error}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {error && (
+                      <div className="text-sm text-red-500 bg-red-500/10 p-3 rounded-lg border border-red-500/60 animate-slide-up">
+                        {error}
+                      </div>
+                    )}
 
-                    {/* Help Links */}
                     <div className="flex flex-col sm:flex-row justify-start gap-4 text-sm text-gray-400 border-t border-gray-800 pt-4">
                       <button type="button" className="flex items-center gap-2 hover:text-red-500 transition-colors">
                         <Search className="w-4 h-4" />
@@ -302,61 +262,55 @@ export default function HeroSection() {
                   </form>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           </div>
 
           {/* Right Content - Car Image */}
-          <motion.div variants={itemVariants} className="w-full lg:w-1/2 hidden lg:block">
-            <motion.img
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-              src="https://mycarrepairdubai.com/wp-content/uploads/2022/08/Car-Repair-Service-2.png"
-              alt="Car Inspection Professional Service"
-              className="w-full h-auto mt-[16vh] ml-20"
-            />
-          </motion.div>
-        </motion.div>
+          <div className="w-full lg:w-1/2 hidden lg:block">
+            <Suspense fallback={<div className="w-full h-full bg-gray-800/20 animate-pulse rounded-lg" />}>
+              <LazyImage
+                src="https://mycarrepairdubai.com/wp-content/uploads/2022/08/Car-Repair-Service-2.png"
+                alt="Car Inspection Professional Service"
+                className="w-full h-auto mt-[16vh] ml-20"
+              />
+            </Suspense>
+          </div>
+        </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <AnimatePresence>
-        {showScroll && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center cursor-pointer"
-            onClick={scrollToContent}
-          >
-            <motion.div
-              animate={{
-                y: [0, 8, 0],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="w-6 h-10 border-2 border-white/50 rounded-full relative flex justify-center mb-2"
-            >
-              <motion.div
-                animate={{
-                  opacity: [0, 1, 0],
-                  y: [0, 16, 0]
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="w-1 h-2 bg-white rounded-full absolute top-2"
-              />
-            </motion.div>
-            <ChevronDown className="w-5 h-5 text-white/70" />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showScroll && <ScrollIndicator onClick={scrollToContent} />}
+
+      <style jsx>{`
+        @keyframes scroll {
+          0% { transform: translateY(0); opacity: 0; }
+          50% { transform: translateY(8px); opacity: 1; }
+          100% { transform: translateY(16px); opacity: 0; }
+        }
+        
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slide-up {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-scroll {
+          animation: scroll 1.5s infinite;
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.8s ease-out forwards;
+        }
+        
+        .animate-slide-up {
+          animation: slide-up 0.3s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
-}
+};
+
+export default memo(HeroSection);
