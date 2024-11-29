@@ -44,7 +44,7 @@ export default function Component() {
     setSubmitStatus(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/contact', {
+      const response = await fetch('http://localhost:3000/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -221,7 +221,7 @@ export default function Component() {
               </p>
               <div className="space-y-4 ">
                 <div className="relative">
-                  <Mail className="relative left-4 top-1/2 transform -translate-y-1/2 text-zinc-500 w-5 h-5" />
+                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-zinc-500 w-5 h-5" />
                   <Input
                     type="email"
                     placeholder="Enter your email"

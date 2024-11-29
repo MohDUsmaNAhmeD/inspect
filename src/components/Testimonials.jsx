@@ -9,7 +9,7 @@ const testimonials = [
     author: "Kim Dae-hyun",
     role: "Business Owner",
     rating: 4,
-    image: "https://randomuser.me/api/portraits/men/1.jpg",
+    image: "https://randomuser.me/api/portraits/men/5.jpg",
     date: "2 weeks ago",
     featured: true
   },
@@ -26,7 +26,7 @@ const testimonials = [
     author: "Mike Johnson",
     role: "Real Estate Agent",
     rating: 5,
-    image: "https://randomuser.me/api/portraits/men/3.jpg",
+    image: "https://randomuser.me/api/portraits/men/7.jpg",
     date: "3 weeks ago",
     featured: true
   },
@@ -43,7 +43,7 @@ const testimonials = [
     author: "Raj Patel",
     role: "Tech Entrepreneur",
     rating: 3,
-    image: "https://randomuser.me/api/portraits/men/5.jpg",
+    image: "https://randomuser.me/api/portraits/men/8.jpg",
     date: "2 months ago",
     featured: true
   }

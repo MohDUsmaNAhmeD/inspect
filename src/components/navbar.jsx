@@ -87,7 +87,7 @@ const Header = () => {
             aria-label="Toggle menu"
           >
             {isMenuOpen ? (
-              <X size={28} className="animate-spin" />
+              <X size={28}  />
             ) : (
               <Menu size={28} className="hover:scale-110 transition-transform" />
             )}

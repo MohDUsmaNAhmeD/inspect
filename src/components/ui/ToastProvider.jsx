@@ -9,7 +9,7 @@ const ToastProvider = ({ children }) => {
 
   const addToast = (toast) => {
     const toastWithDefaults = {
-      duration: 5000,  // Default duration of 5 seconds
+      duration: 3000,  // Default duration of 5 seconds
       type: 'default', // default, success, error, warning, info
       ...toast
     };

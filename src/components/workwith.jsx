@@ -25,7 +25,7 @@ const partners = [
   },
   { 
     code: 'US', 
-    image: '<a href="https://imgbb.com/"><img src="https://i.ibb.co/qp9fP4n/dvlabg-1-removebg-preview.png" alt="dvlabg-1-removebg-preview" border="0"></a>'
+    image: 'https://i.ibb.co/qp9fP4n/dvlabg-1-removebg-preview.png'
   }
  
 ];

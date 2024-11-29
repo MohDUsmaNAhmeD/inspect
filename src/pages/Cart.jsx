@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
-import { toast } from "react-hot-toast";
-import { ArrowLeft, Trash2, Lock, CreditCard } from "lucide-react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { useMediaQuery } from 'react-responsive';
+import React, { useState, useEffect, useMemo } from 'react';
+import { toast } from 'react-hot-toast';
+import { ArrowLeft, Trash2, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import {
   Card,
   CardHeader,
@@ -14,89 +13,176 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Separator } from "../components/ui/separator";
 import Header from "../components/navbar";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 const CartItem = ({ item, onRemove, fadeOut }) => {
-  const isMobile = useMediaQuery({ maxWidth: 768 });
-
-  if (isMobile) {
-    return (
-      <Card
-        className={`bg-gray-900/50 border-gray-800 backdrop-blur transform transition-all duration-300 
-          ${fadeOut === item.id ? 'opacity-0 translate-x-4' : 'opacity-100 hover:shadow-lg hover:border-gray-700'}`}
-      >
-        <CardContent className="p-4">
-          <div className="flex flex-col space-y-4">
-            <div className="flex-1 min-w-0 space-y-2">
-              <h3 className="font-semibold text-lg tracking-tight">{item.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{item.description}</p>
-            </div>
-            <div className="flex justify-between items-center">
-              <div className="text-xl font-bold text-red-500">
-                ${parseFloat(item.price).toFixed(2)}
-              </div>
-              <button
-                onClick={() => onRemove(item.id)}
-                className="text-gray-400 hover:text-red-500"
-              >
-                <Trash2 className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const getPrice = () => {
+    if (!prices) return '0.00';
+    return prices[item.reportType]?.toFixed(2) || '0.00';
+  };
 
   return (
-    <Card
-      className={`bg-gray-900/50 border-gray-800 backdrop-blur transform transition-all duration-300 
-        ${fadeOut === item.cartId ? "opacity-0 translate-x-4" : "opacity-100 hover:shadow-lg hover:border-gray-700"}`}
-    >
-      <CardContent className="p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-          <div className="flex-1 min-w-0 space-y-2">
-            <h3 className="font-semibold text-xl tracking-tight">{item.title}</h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              {item.description}
-            </p>
-          </div>
-          <div className="flex items-center gap-6">
-            <span className="text-xl font-semibold min-w-[100px] text-right">
-              ${parseFloat(item.price).toFixed(2)}
-            </span>
-            <button
-              onClick={() => onRemove(item.cartId)}
-              className="text-gray-400 hover:text-red-500 hover:bg-gray-800/50"
-            >
-              <Trash2 className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className={`flex items-center justify-between p-4 bg-zinc-900/50 rounded-lg ${fadeOut === item.cartId ? 'fade-out' : ''}`}>
+      <div className="flex-1">
+        <h3 className="font-semibold">{item.reportType}</h3>
+        <p className="text-sm text-zinc-400">VIN: {item.vin}</p>
+      </div>
+      <div className="flex items-center gap-4">
+        <span className="font-semibold">${getPrice()}</span>
+        <button
+          onClick={() => onRemove(item.cartId)}
+          className="p-2 text-zinc-400 hover:text-red-500 transition-colors"
+        >
+          <Trash2 className="h-5 w-5" />
+        </button>
+      </div>
+    </div>
   );
 };
 
+// Customer Information Form Component
+function CustomerInfoForm({ formData, setFormData, errors }) {
+  return (
+    <Card className="bg-gray-900/50 border-gray-800">
+      <CardHeader>
+        <CardTitle>Customer Information</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="customerName">Full Name</Label>
+          <Input
+            id="customerName"
+            value={formData.customerName}
+            onChange={(e) =>
+              setFormData({ ...formData, customerName: e.target.value })
+            }
+            className="bg-gray-800/50 border-gray-700"
+          />
+          {errors.customerName && (
+            <p className="text-red-500 text-sm">{errors.customerName}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="customerEmail">Email Address</Label>
+          <Input
+            id="customerEmail"
+            type="email"
+            value={formData.customerEmail}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                customerEmail: e.target.value,
+              })
+            }
+            className="bg-gray-800/50 border-gray-700"
+          />
+          {errors.customerEmail && (
+            <p className="text-red-500 text-sm">{errors.customerEmail}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="vinNumber">VIN Number</Label>
+          <Input
+            id="vinNumber"
+            value={formData.vinNumber}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                vinNumber: e.target.value.toUpperCase(),
+              })
+            }
+            className="bg-gray-800/50 border-gray-700"
+            maxLength={17}
+          />
+          {errors.vinNumber && (
+            <p className="text-red-500 text-sm">{errors.vinNumber}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="address">Address</Label>
+          <Input
+            id="address"
+            value={formData.address || ''}
+            onChange={(e) =>
+              setFormData({ ...formData, address: e.target.value })
+            }
+            className="bg-gray-800/50 border-gray-700"
+          />
+          {errors.address && (
+            <p className="text-red-500 text-sm">{errors.address}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="city">City</Label>
+          <Input
+            id="city"
+            value={formData.city || ''}
+            onChange={(e) =>
+              setFormData({ ...formData, city: e.target.value })
+            }
+            className="bg-gray-800/50 border-gray-700"
+          />
+          {errors.city && (
+            <p className="text-red-500 text-sm">{errors.city}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="country">Country</Label>
+          <Input
+            id="country"
+            value={formData.country || ''}
+            onChange={(e) =>
+              setFormData({ ...formData, country: e.target.value })
+            }
+            className="bg-gray-800/50 border-gray-700"
+          />
+          {errors.country && (
+            <p className="text-red-500 text-sm">{errors.country}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phoneNumber">Phone Number</Label>
+          <Input
+            id="phoneNumber"
+            type="tel"
+            value={formData.phoneNumber || ''}
+            onChange={(e) =>
+              setFormData({ ...formData, phoneNumber: e.target.value })
+            }
+            className="bg-gray-800/50 border-gray-700"
+          />
+          {errors.phoneNumber && (
+            <p className="text-red-500 text-sm">{errors.phoneNumber}</p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// Main Cart Component
 export default function Cart() {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [fadeOut, setFadeOut] = useState(false);
-  const [isFormValid, setIsFormValid] = useState(false);
-  const paypalButtonsRef = useRef(null);
+  const [fadeOut, setFadeOut] = useState(null);
+  const [prices, setPrices] = useState(null);
   const [formData, setFormData] = useState({
-    fullName: '',
-    phoneNumber: '',
+    customerName: '',
+    customerEmail: '',
     vinNumber: '',
+    address: '',
+    city: '',
+    country: '',
+    phoneNumber: ''
   });
   const [errors, setErrors] = useState({});
+  const [isFormValid, setIsFormValid] = useState(false);
   const navigate = useNavigate();
-  const [showPayment, setShowPayment] = useState(false);
-  const isMobile = useMediaQuery({ maxWidth: 768 });
-
-  const subtotal = cart.reduce((sum, item) => sum + parseFloat(item.price), 0);
-  const tax = subtotal * 0.08;
-  const total = subtotal + tax;
 
   useEffect(() => {
     const savedCart = localStorage.getItem("vehicle_reports_cart");
@@ -105,258 +191,152 @@ export default function Cart() {
     }
   }, []);
 
-  const updateCart = (newCart) => {
-    setCart(newCart);
-    localStorage.setItem("vehicle_reports_cart", JSON.stringify(newCart));
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const response = await fetch('/api/prices');
+        const data = await response.json();
+        if (data.success) {
+          setPrices(data.prices);
+        }
+      } catch (error) {
+        console.error('Error fetching prices:', error);
+      }
+    };
+
+    fetchPrices();
+  }, []);
+
+  const getItemPrice = (reportType) => {
+    if (!prices) return 0;
+    return prices[reportType] || 0;
+  };
+
+  const subtotal = useMemo(() => {
+    return cart.reduce((total, item) => total + getItemPrice(item.reportType), 0);
+  }, [cart, prices]);
+
+  const total = useMemo(() => {
+    return subtotal + (subtotal * 0.15); // 15% tax
+  }, [subtotal]);
+
+  useEffect(() => {
+    const valid = validateForm();
+    console.log('Form validation result:', valid, formData);
+  }, [formData]);
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.customerName.trim()) {
+      newErrors.customerName = 'Name is required';
+    }
+
+    if (!formData.customerEmail.trim()) {
+      newErrors.customerEmail = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.customerEmail)) {
+      newErrors.customerEmail = 'Invalid email address';
+    }
+
+    if (!formData.vinNumber.trim()) {
+      newErrors.vinNumber = 'VIN is required';
+    } else if (formData.vinNumber.length !== 17) {
+      newErrors.vinNumber = 'VIN must be 17 characters';
+    }
+
+    setErrors(newErrors);
+    const valid = Object.keys(newErrors).length === 0;
+    setIsFormValid(valid);
+    return valid;
   };
 
   const removeFromCart = (cartId) => {
     setFadeOut(cartId);
     setTimeout(() => {
-      updateCart(cart.filter((item) => item.cartId !== cartId));
-      setFadeOut(false);
+      const newCart = cart.filter((item) => item.cartId !== cartId);
+      setCart(newCart);
+      localStorage.setItem("vehicle_reports_cart", JSON.stringify(newCart));
+      setFadeOut(null);
     }, 300);
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const validateForm = () => {
-    if (!formData.fullName || !formData.phoneNumber || !formData.vinNumber) {
-      return false;
-    }
-    
-    const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(formData.phoneNumber)) {
-      return false;
-    }
-
-    if (formData.vinNumber.length !== 17) {
-      return false;
-    }
-    
-    return true;
-  };
-
-  useEffect(() => {
-    setIsFormValid(validateForm());
-  }, [formData]);
-
-  const handlePaypalSuccess = async (details) => {
+  const handlePaypalApprove = async (data) => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/send-email', {
+
+      // Verify PayPal order
+      const verifyResponse = await fetch('http://localhost:3000/api/verify-paypal-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          orderDetails: {
-            items: cart,
-            total: total.toFixed(2),
-            customerInfo: {
-              ...formData,
-              email: details.payer.email_address,
-            },
-            paypalDetails: details
-          }
+          orderId: data.orderID,
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to send confirmation email');
+      const verifyResult = await verifyResponse.json();
+      if (!verifyResult.success) {
+        throw new Error(verifyResult.message || 'Failed to verify PayPal order');
       }
 
-      toast.success("Payment successful! Check your email for order details.");
-      updateCart([]);
-      navigate('/');
+      // Send confirmation emails
+      const emailResponse = await fetch('http://localhost:3000/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerName: formData.customerName,
+          customerEmail: formData.customerEmail,
+          vinNumber: formData.vinNumber,
+          items: cart,
+          amount: total,
+          paypalOrderId: data.orderID,
+        }),
+      });
+
+      const emailResult = await emailResponse.json();
+      if (!emailResult.success) {
+        throw new Error(emailResult.message || 'Failed to send confirmation email');
+      }
+
+      // Clear cart and redirect
+      localStorage.removeItem("vehicle_reports_cart");
+      toast.success('Order completed successfully!');
+      navigate('/success');
     } catch (error) {
-      console.error('Error:', error);
-      toast.error("Payment completed but failed to send confirmation email");
+      console.error('Error processing order:', error);
+      toast.error(error.message || 'Failed to process order');
     } finally {
       setLoading(false);
     }
   };
 
-  if (isMobile) {
-    return (
-      <div className="min-h-screen bg-zinc-950 text-white p-4 md:p-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2 hover:bg-zinc-800 rounded-full transition-colors"
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </button>
-            <h1 className="text-2xl md:text-3xl font-bold">Shopping Cart</h1>
-          </div>
-
-          {/* Cart Content */}
-          <div className="grid md:grid-cols-[1fr,380px] gap-8">
-            {/* Cart Items */}
-            <div className="space-y-4">
-              {cart.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-400">Your cart is empty</p>
-                </div>
-              ) : (
-                cart.map((item) => (
-                  <CartItem
-                    key={item.id}
-                    item={item}
-                    onRemove={removeFromCart}
-                    fadeOut={fadeOut}
-                  />
-                ))
-              )}
-            </div>
-
-            {/* Order Summary */}
-            <div className="bg-zinc-900 rounded-xl p-6 h-fit space-y-6 sticky top-4">
-              <h2 className="text-xl font-semibold">Order Summary</h2>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center text-lg">
-                  <span>Total</span>
-                  <span className="text-xl font-bold bg-gray-800 px-4 py-2 rounded-lg">
-                    ${total.toFixed(2)}
-                  </span>
-                </div>
-                <button
-                  onClick={() => setShowPayment(!showPayment)}
-                  className="w-full bg-gradient-to-r from-red-900 to-red-800 hover:from-red-800 hover:to-red-700 
-                    text-white py-4 rounded-xl flex items-center justify-center gap-3 transition-all duration-300 text-lg"
-                >
-                  <CreditCard className="h-6 w-6" />
-                  Enter Payment Details
-                </button>
-
-                {showPayment && (
-                  <div className="bg-zinc-800/80 backdrop-blur-sm p-6 rounded-xl mt-4 space-y-6">
-                    <h3 className="text-xl font-semibold">Customer Details</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="fullName" className="block text-sm font-medium text-gray-200 mb-2">
-                          Full Name *
-                        </label>
-                        <input
-                          type="text"
-                          id="fullName"
-                          name="fullName"
-                          value={formData.fullName}
-                          onChange={handleInputChange}
-                          className="w-full rounded-xl bg-gray-900/50 border border-gray-700 px-4 py-3 text-white shadow-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 text-base"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-200 mb-2">
-                          Phone Number * (10 digits)
-                        </label>
-                        <input
-                          type="tel"
-                          id="phoneNumber"
-                          name="phoneNumber"
-                          value={formData.phoneNumber}
-                          onChange={handleInputChange}
-                          placeholder="1234567890"
-                          className="w-full rounded-xl bg-gray-900/50 border border-gray-700 px-4 py-3 text-white shadow-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 text-base"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor="vinNumber" className="block text-sm font-medium text-gray-200 mb-2">
-                          VIN Number * (17 characters)
-                        </label>
-                        <input
-                          type="text"
-                          id="vinNumber"
-                          name="vinNumber"
-                          value={formData.vinNumber}
-                          onChange={handleInputChange}
-                          className="w-full rounded-xl bg-gray-900/50 border border-gray-700 px-4 py-3 text-white shadow-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 text-base"
-                          required
-                        />
-                      </div>
-
-                      {isFormValid && (
-                        <div className="pt-4">
-                          <PayPalScriptProvider options={{ 
-                            "client-id": "test",
-                            currency: "USD"
-                          }}>
-                            <PayPalButtons
-                              createOrder={(data, actions) => {
-                                return actions.order.create({
-                                  purchase_units: [
-                                    {
-                                      amount: {
-                                        value: total.toFixed(2),
-                                      },
-                                    },
-                                  ],
-                                });
-                              }}
-                              onApprove={(data, actions) => {
-                                return actions.order.capture().then((details) => {
-                                  handlePaypalSuccess(details);
-                                });
-                              }}
-                              style={{ layout: "vertical" }}
-                            />
-                          </PayPalScriptProvider>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <nav className="mb-8">
-          <button
-            onClick={() => window.history.back()}
-            className="group flex items-center text-gray-400 hover:text-white transition-colors px-4 py-2 rounded-lg"
-          >
-            <ArrowLeft className="h-5 w-5 mr-2 transition-transform group-hover:-translate-x-1" />
-            Continue Shopping
-          </button>
-        </nav>
+        <button
+          onClick={() => navigate(-1)}
+          className="group flex items-center text-gray-400 hover:text-white transition-colors mb-8"
+        >
+          <ArrowLeft className="h-5 w-5 mr-2 transition-transform group-hover:-translate-x-1" />
+          Continue Shopping
+        </button>
 
-        <header className="mb-12">
-          <h1 className="text-4xl font-bold tracking-tight">Shopping Cart</h1>
-        </header>
+        <h1 className="text-4xl font-bold tracking-tight mb-12">Shopping Cart</h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8">
           <main className="lg:col-span-8 space-y-6">
             {cart.length === 0 ? (
-              <Card className="bg-gray-900/50 border-gray-800 backdrop-blur">
-                <CardContent className="flex flex-col items-center justify-center py-16">
-                  <h3 className="text-2xl font-semibold mb-4">
-                    Your cart is empty
-                  </h3>
-                  <p className="text-gray-400 mb-8 text-lg text-center max-w-md">
+              <Card className="bg-gray-900/50 border-gray-800">
+                <CardContent className="p-12 text-center">
+                  <p className="text-gray-400 mb-8">
                     Add some vehicle reports to get started with your purchase!
                   </p>
                   <button
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate(-1)}
                     className="bg-gradient-to-r from-red-900 to-red-800 hover:from-red-800 hover:to-red-700 
                       text-white px-8 py-6 text-lg rounded-xl transition-all duration-300 hover:scale-105"
                   >
@@ -365,153 +345,109 @@ export default function Cart() {
                 </CardContent>
               </Card>
             ) : (
-              <>
-                <div className="space-y-4">
-                  {cart.map((item) => (
-                    <CartItem
-                      key={item.cartId}
-                      item={item}
-                      onRemove={removeFromCart}
-                      fadeOut={fadeOut}
-                    />
-                  ))}
-                </div>
-
-                <Card className="bg-gray-900/50 border-gray-800 backdrop-blur mt-8">
-                  <CardHeader>
-                    <CardTitle>Customer Information</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="fullName" className="block text-sm font-medium text-gray-200">
-                          Full Name *
-                        </label>
-                        <input
-                          type="text"
-                          id="fullName"
-                          name="fullName"
-                          value={formData.fullName}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full rounded-md bg-gray-800 border border-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-200">
-                          Phone Number * (10 digits)
-                        </label>
-                        <input
-                          type="tel"
-                          id="phoneNumber"
-                          name="phoneNumber"
-                          value={formData.phoneNumber}
-                          onChange={handleInputChange}
-                          placeholder="1234567890"
-                          className="mt-1 block w-full rounded-md bg-gray-800 border border-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor="vinNumber" className="block text-sm font-medium text-gray-200">
-                          VIN Number * (17 characters)
-                        </label>
-                        <input
-                          type="text"
-                          id="vinNumber"
-                          name="vinNumber"
-                          value={formData.vinNumber}
-                          onChange={handleInputChange}
-                          className="mt-1 block w-full rounded-md bg-gray-800 border border-gray-700 text-white shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
+              <Card className="bg-gray-900/50 border-gray-800">
+                <CardHeader>
+                  <CardTitle>Order Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {cart.map((item) => (
+                      <CartItem
+                        key={item.cartId}
+                        item={item}
+                        onRemove={removeFromCart}
+                        fadeOut={fadeOut}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </main>
 
           <aside className="lg:col-span-4">
-            <Card className="bg-gray-900/50 border-gray-800 sticky top-8 backdrop-blur">
+            <Card className="bg-gray-900/50 border-gray-800 sticky top-8">
               <CardHeader className="border-b border-gray-800">
-                <CardTitle className="text-2xl">Order Summary</CardTitle>
+                <CardTitle>Order Summary</CardTitle>
               </CardHeader>
 
               <CardContent className="p-6 space-y-8">
-                <div className="space-y-4">
-                  <div className="flex justify-between text-lg">
-                    <span className="text-gray-400">Subtotal</span>
+                <div>
+                  <div className="flex justify-between">
+                    <span>Subtotal</span>
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
 
                   <Separator className="my-4 bg-gray-800" />
+
                   <div className="flex justify-between items-center">
                     <span className="text-xl font-semibold">Total</span>
-                    <span className="text-2xl font-bold">
-                      ${total.toFixed(2)}
-                    </span>
+                    <span className="text-2xl font-bold">${total.toFixed(2)}</span>
                   </div>
                 </div>
 
-                <div className="mt-6">
-                  {cart.length > 0 && (
-                    <div className="space-y-4">
-                      {!isFormValid && (
-                        <p className="text-sm text-red-400">
-                          Please fill in all required fields correctly to proceed with payment
-                        </p>
-                      )}
-                      {isFormValid && (
-                        <PayPalScriptProvider options={{ 
-                          "client-id": "test",
-                          currency: "USD"
-                        }}>
-                          <PayPalButtons
-                            createOrder={(data, actions) => {
-                              return actions.order.create({
-                                purchase_units: [
-                                  {
-                                    amount: {
-                                      value: total.toFixed(2),
-                                    },
+                {cart.length > 0 && (
+                  <div className="space-y-4">
+                    <PayPalScriptProvider
+                      options={{
+                        clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
+                        currency: "USD",
+                        intent: "capture",
+                      }}
+                    >
+                      {isFormValid ? (
+                        <PayPalButtons
+                          style={{ layout: 'vertical' }}
+                          disabled={loading}
+                          forceReRender={[total, isFormValid]}
+                          createOrder={(data, actions) => {
+                            return actions.order.create({
+                              purchase_units: [
+                                {
+                                  amount: {
+                                    value: total.toFixed(2),
+                                    currency_code: 'USD',
                                   },
-                                ],
-                              });
-                            }}
-                            onApprove={(data, actions) => {
-                              return actions.order.capture().then((details) => {
-                                handlePaypalSuccess(details);
-                              });
-                            }}
-                            style={{ layout: "horizontal" }}
-                          />
-                        </PayPalScriptProvider>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <footer className="space-y-4 pt-6 border-t border-gray-800">
-                  <div className="space-y-3">
-                    {[{ icon: Lock, text: "Secure Payment" }].map(
-                      ({ icon: Icon, text }, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center text-sm text-gray-400 hover:text-white transition-colors"
-                        >
-                          <Icon className="h-4 w-4 mr-3 flex-shrink-0" />
-                          {text}
+                                },
+                              ],
+                            });
+                          }}
+                          onApprove={(data, actions) => {
+                            return actions.order.capture().then(() => {
+                              handlePaypalApprove(data);
+                            });
+                          }}
+                          onError={(err) => {
+                            console.error('PayPal error:', err);
+                            toast.error('There was an error processing your payment');
+                          }}
+                        />
+                      ) : (
+                        <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+                          <p className="text-sm text-gray-400">
+                            Please fill in all required fields to enable payment
+                          </p>
                         </div>
-                      )
-                    )}
+                      )}
+                    </PayPalScriptProvider>
+                  </div>
+                )}
+
+                <footer className="pt-4 border-t border-gray-800">
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm text-gray-400 hover:text-white transition-colors">
+                      <Lock className="h-4 w-4 mr-3 flex-shrink-0" />
+                      Secure Payment
+                    </div>
                   </div>
                 </footer>
               </CardContent>
             </Card>
+            <CustomerInfoForm 
+              formData={formData}
+              setFormData={setFormData}
+              errors={errors}
+            />
           </aside>
         </div>
       </div>

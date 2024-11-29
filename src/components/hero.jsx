@@ -1,5 +1,5 @@
 import React, { useState, useEffect, memo, lazy, Suspense } from 'react';
-import { ArrowRightCircle, ChevronDown, Search, Info, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowRightCircle, ChevronDown, Search, Info, CheckCircle2, XCircle, X } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { vinValidation } from './ui/VinValidator';
 
@@ -44,6 +44,107 @@ const LazyImage = lazy(() => Promise.resolve({
   )
 }));
 
+const VinInfoPopup = memo(({ type, onClose }) => {
+  const content = type === 'location' ? {
+    title: 'VIN Location Guide',
+    subtitle: 'Common places to find your Vehicle Identification Number',
+    details: [
+      { title: 'Dashboard', description: 'Look through the windshield at the driver\'s side dashboard.', icon: '🚗' },
+      { title: 'Driver\'s Door', description: 'Check the driver\'s side door jamb or door post.', icon: '🚪' },
+      { title: 'Engine Block', description: 'Examine the front of the engine block.', icon: '⚙️' },
+      { title: 'Frame Rail', description: 'Look at the frame rail near the windshield washer fluid container.', icon: '🔧' }
+    ]
+  } : {
+    title: 'VIN Structure Guide',
+    subtitle: 'Understanding your 17-character Vehicle Identification Number',
+    details: [
+      { title: 'Positions 1-3 (WMI)', description: 'World Manufacturer Identifier - Indicates the vehicle manufacturer', icon: '🏢' },
+      { title: 'Positions 4-8', description: 'Vehicle Description Section (VDS) - Describes vehicle attributes', icon: '📝' },
+      { title: 'Position 9', description: 'Check Digit - Used to detect invalid VINs', icon: '✓' },
+      { title: 'Positions 10-17', description: 'Vehicle Identifier Section (VIS) - Contains unique vehicle info', icon: '🔍' }
+    ]
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in"
+         onClick={onClose}>
+      <div 
+        className="relative max-w-2xl w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl overflow-hidden shadow-2xl animate-slide-up border border-gray-700/50"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header with gradient overlay */}
+        <div className="relative p-8 pb-6">
+          <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-red-700/10" />
+          <button
+            onClick={onClose}
+            className="absolute right-6 top-6 text-gray-400 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <h2 className="text-3xl font-bold text-white mb-2 relative">{content.title}</h2>
+          <p className="text-gray-400 relative">{content.subtitle}</p>
+        </div>
+
+        {/* Content with glass effect */}
+        <div className="p-8 pt-4 bg-white/5">
+          <div className="grid gap-6">
+            {content.details.map((item, index) => (
+              <div 
+                key={index}
+                className="group relative bg-gradient-to-r from-gray-800/50 to-gray-900/50 p-6 rounded-xl border border-gray-700/30 hover:border-red-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/5"
+              >
+                <div className="flex items-start gap-4">
+                  <span className="text-2xl">{item.icon}</span>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-red-400 transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-400 leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 to-red-500/0 group-hover:from-red-500/3 group-hover:to-red-500/5 rounded-xl transition-all duration-300" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer with helpful tip */}
+        <div className="p-6 bg-gray-900/50 border-t border-gray-800">
+          <p className="text-sm text-gray-500 flex items-center gap-2">
+            <Info className="w-4 h-4" />
+            <span>Click anywhere outside to close this window</span>
+          </p>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-out;
+        }
+        .animate-slide-up {
+          animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from { 
+            opacity: 0;
+            transform: translateY(20px) scale(0.96);
+          }
+          to { 
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+      `}</style>
+    </div>
+  );
+});
+
 const HeroSection = () => {
   const [email, setEmail] = useState('');
   const [vin, setVin] = useState('');
@@ -53,6 +154,7 @@ const HeroSection = () => {
   const [showScroll, setShowScroll] = useState(true);
   const [isVinValid, setIsVinValid] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const [showVinInfo, setShowVinInfo] = useState(null);
 
   useEffect(() => {
     // Optimized scroll handler with debounce
@@ -152,6 +254,12 @@ const HeroSection = () => {
 
       {/* Main Content */}
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
+        {showVinInfo && (
+          <VinInfoPopup
+            type={showVinInfo}
+            onClose={() => setShowVinInfo(null)}
+          />
+        )}
         <div className="flex flex-col lg:flex-row min-h-screen items-center gap-8 lg:gap-12 animate-fade-in">
           {/* Left Content */}
           <div className="w-full lg:w-1/2 pt-20 lg:pt-0">
@@ -236,10 +344,10 @@ const HeroSection = () => {
                           Processing...
                         </span>
                       ) : (
-                        <>
+                        <React.Fragment>
                           Get Vehicle Report
                           <ArrowRightCircle className="w-5 h-5" />
-                        </>
+                        </React.Fragment>
                       )}
                     </button>
 
@@ -250,13 +358,20 @@ const HeroSection = () => {
                     )}
 
                     <div className="flex flex-col sm:flex-row justify-start gap-4 text-sm text-gray-400 border-t border-gray-800 pt-4">
-                      <button type="button" className="flex items-center gap-2 hover:text-red-500 transition-colors">
-                        <Search className="w-4 h-4" />
-                        <span>Find VIN Location</span>
-                      </button>
-                      <button type="button" className="flex items-center gap-2 hover:text-red-500 transition-colors">
+                      <button
+                        onClick={() => setShowVinInfo('location')}
+                        className="text-sm text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
+                      >
                         <Info className="w-4 h-4" />
-                        <span>VIN Structure Guide</span>
+                        Find VIN Location
+                      </button>
+                      <span className="text-gray-500">|</span>
+                      <button
+                        onClick={() => setShowVinInfo('structure')}
+                        className="text-sm text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
+                      >
+                        <Info className="w-4 h-4" />
+                        VIN Structure Guide
                       </button>
                     </div>
                   </form>

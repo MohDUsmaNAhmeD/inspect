@@ -19,6 +19,7 @@ import {
 import { Badge } from "./ui/badge";
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
+import { API_BASE_URL } from "../config/api";
 // Cart Storage utilities
 const CartStorage = {
   key: "vehicle_reports_cart",
@@ -100,7 +101,7 @@ const PlanCard = ({ plan, onAction, featured }) => {
   };
 
   return (
-    <div className={`relative flex flex-col p-6 bg-zinc-800 shadow-lg rounded-lg ${plan.featured ? 'border-2 border-red-500' : ''}`}>
+    <div className={`relative flex flex-col p-6 shadow-lg rounded-lg ${plan.featured ? 'border-2 border-red-500' : ''}`}>
       {plan.topSelling && (
         <div className="absolute -top-4 -right-4 bg-red-500 text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg transform rotate-12">
           Top Selling
@@ -215,7 +216,7 @@ export default function VehicleHistoryReports() {
   useEffect(() => {
     const fetchPrices = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/prices');
+        const response = await fetch(`${API_BASE_URL}/api/prices`);
         if (!response.ok) {
           throw new Error('Failed to fetch prices');
         }
