@@ -128,7 +128,9 @@ const AboutUs = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-6 md:mb-8">
             Ready to Experience the Difference?
           </h2>
-          <Button className="bg-red-600 hover:bg-red-700 text-white text-lg px-6 py-3 md:px-8 md:py-4" onClick={() => window.location.href = '#plans'}>
+          <Button className="bg-red-600 hover:bg-red-700 text-white text-lg px-6 py-3 md:px-8 md:py-4" onClick={() =>
+              document.getElementById("plans").scrollIntoView({ behavior: "smooth" })
+            }>
             Schedule an Inspection
           </Button>
         </div>

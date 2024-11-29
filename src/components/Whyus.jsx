@@ -42,7 +42,7 @@ const FeaturesSection = () => {
       ),
       title: "Reasonable Price",
       description:
-        "MOTOCHECKS proudly delivers the auto industry's most competitive prices, setting the standard for affordability, value, and customer satisfaction, ensuring customers get the best deals.",
+        "VehicleInfo proudly delivers the auto industry's most competitive prices, setting the standard for affordability, value, and customer satisfaction, ensuring customers get the best deals.",
     },
     {
       icon: (
@@ -59,7 +59,7 @@ const FeaturesSection = () => {
       ),
       title: "Specifications",
       description:
-        "MOTOCHECKS provides vital information, including engine type, year manufactured, model, and matching parts, ensuring customers have comprehensive details.",
+        "VehicleInfo provides vital information, including engine type, year manufactured, model, and matching parts, ensuring customers have comprehensive details.",
     },
     {
       icon: (
@@ -76,7 +76,7 @@ const FeaturesSection = () => {
       ),
       title: "Collision History",
       description:
-        "MOTOCHECKS also furnishes the history of car accidents and major damages sustained over time, empowering buyers with crucial insights into a vehicle's past performance.",
+        "VehicleInfo also furnishes the history of car accidents and major damages sustained over time, empowering buyers with crucial insights into a vehicle's past performance.",
     },
     {
       icon: (
@@ -93,7 +93,7 @@ const FeaturesSection = () => {
       ),
       title: "Stolen Cars",
       description:
-        "MOTOCHECKS meticulously records the history of each car, detailing its usage patterns and documenting any instances of vehicle theft, accidents, or repossession.",
+        "VehicleInfo meticulously records the history of each car, detailing its usage patterns and documenting any instances of vehicle theft, accidents, or repossession.",
     },
     {
       icon: (
@@ -111,7 +111,7 @@ const FeaturesSection = () => {
       ),
       title: "Trusted Provider",
       description:
-        "MOTOCHECKS offers ratings sliders for car rollover, side barrier, front and rear seats, and front and side ratings, enabling users to assess various safety aspects for informed vehicle.",
+        "VehicleInfo offers ratings sliders for car rollover, side barrier, front and rear seats, and front and side ratings, enabling users to assess various safety aspects for informed vehicle.",
     },
   ];
 

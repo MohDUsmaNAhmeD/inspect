@@ -5,23 +5,27 @@ import { Car, Flag, Building2 } from 'lucide-react';
 const partners = [
   { 
     code: 'IT', 
-    image: 'https://i.ibb.co/HKzN0QQ/Screenshot-6-11-2024-224638-drivesafeinspects-com-removebg-preview.png'
+    image: 'https://i.ibb.co/NLQ26xh/NHTSA-logo2-removebg-preview.png'
   },
   { 
     code: 'DE', 
-    image: 'https://i.ibb.co/VVsq7RM/Screenshot-6-11-2024-224633-drivesafeinspects-com-removebg-preview.png'
+    image: 'https://i.ibb.co/4sn8PtF/national-insurance-crime-bureau-nicb-vector-logo-removebg-preview.png'
   },
   { 
     code: 'FR', 
-    image: 'https://i.ibb.co/P5PDCkp/Screenshot-6-11-2024-224627-drivesafeinspects-com-removebg-preview.png'
+    image: 'https://i.ibb.co/TY6Mwwj/NMVTIS-Logo-removebg-preview.png'
   },
   { 
     code: 'US', 
-    image: 'https://i.ibb.co/GR7TdL3/Screenshot-6-11-2024-224612-drivesafeinspects-com-removebg-preview.png'
+    image: 'https://i.ibb.co/jLWsGGS/4c-removebg-preview.png'
   },
   { 
     code: 'CN', 
-    image: 'https://i.ibb.co/XssC50K/Screenshot-6-11-2024-224621-drivesafeinspects-com-removebg-preview.png'
+    image: 'https://i.ibb.co/swHDY7p/2c-removebg-preview.png'
+  },
+  { 
+    code: 'US', 
+    image: '<a href="https://imgbb.com/"><img src="https://i.ibb.co/qp9fP4n/dvlabg-1-removebg-preview.png" alt="dvlabg-1-removebg-preview" border="0"></a>'
   }
  
 ];

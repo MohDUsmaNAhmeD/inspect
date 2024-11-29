@@ -43,12 +43,30 @@ export default function Component() {
     setIsSubmitting(true);
     setSubmitStatus(null);
 
-    // Simulate API call
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setSubmitStatus("success");
-      // Reset form after success
-      setFormState({ email: "", phone: "", name: "", message: "" });
+      const response = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formState.name,
+          email: formState.email,
+          message: formState.message,
+          subject: "",
+          toEmail: 'gvehiclesinfo@gmail.com'
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSubmitStatus("success");
+        // Reset form
+        setFormState({ email: "", phone: "", name: "", message: "" });
+      } else {
+        setSubmitStatus("error");
+      }
     } catch (error) {
       setSubmitStatus("error");
     } finally {

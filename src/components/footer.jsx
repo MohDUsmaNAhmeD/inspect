@@ -8,7 +8,7 @@ const AnimatedFooter = () => {
         {/* Copyright */}
         <div className="container mx-auto px-2 py-6 border-t border-white/5 mb-[-80px]">
           <div className="text-center text-gray-400">
-            <p className="text-sm ">&copy; {new Date().getFullYear()} Your Company. All rights reserved.</p>
+            <p className="text-sm ">&copy;Vehicle Info. All rights reserved.</p>
           </div>
         </div>
       </div>

@@ -1,196 +1,240 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent } from "./ui/card";
+import { Quote, Star, MessageCircle, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { shuffle } from "lodash";
 
 const testimonials = [
   {
-    content: "I appreciated the clear and honest feedback on my vehicle's condition.",
+    content: "The inspection was incredibly thorough. They found issues I hadn't even noticed and provided clear solutions.",
     author: "Kim Dae-hyun",
-    role: "Office Worker",
-    age: "28"
+    role: "Business Owner",
+    rating: 4,
+    image: "https://randomuser.me/api/portraits/men/1.jpg",
+    date: "2 weeks ago",
+    featured: true
   },
   {
-    content: "Efficient and professional. The staff was well-trained and provided good insights.",
-    author: "Han Na-rae",
-    role: "Office Worker",
-    age: "40"
-  },
-  {
-    content: "They explained the inspection details clearly. I feel more confident about my car now.",
+    content: "Professional service from start to finish. The digital report was comprehensive and easy to understand.",
     author: "Sarah Chen",
-    role: "Team Lead",
-    age: "31"
+    role: "Software Engineer",
+    rating: 4,
+    image: "https://randomuser.me/api/portraits/women/2.jpg",
+    date: "1 month ago"
   },
   {
-    content: "The inspection was helpful in identifying some minor issues. Overall a good experience.",
+    content: "Best vehicle inspection service I've used .They are really expert and their attention to detail is remarkable.",
     author: "Mike Johnson",
-    role: "Event Planner",
-    age: "29"
+    role: "Real Estate Agent",
+    rating: 5,
+    image: "https://randomuser.me/api/portraits/men/3.jpg",
+    date: "3 weeks ago",
+    featured: true
   },
   {
-    content: "Very professional service. I recommend this to anyone needing a car check-up.",
+    content: "The team went above and beyond. They explained everything in detail and answered all my questions.",
     author: "Emma Williams",
-    role: "New Parent",
-    age: "27"
+    role: "Marketing Director",
+    rating: 5,
+    image: "https://randomuser.me/api/portraits/women/4.jpg",
+    date: "1 week ago"
   },
   {
-    content: "The team provided reliable inspection results. I'm very satisfied with the service.",
+    content: "They helped me avoid a potentially costly purchase. Highly recommend their service!",
     author: "Raj Patel",
-    role: "Cultural Consultant",
-    age: "35"
+    role: "Tech Entrepreneur",
+    rating: 3,
+    image: "https://randomuser.me/api/portraits/men/5.jpg",
+    date: "2 months ago",
+    featured: true
   }
 ];
 
 const TestimonialCard = ({ testimonial }) => (
-  <Card className="bg-zinc-900 border-zinc-800 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl group">
-    <CardContent className="p-8">
-      <div className="mb-6">
-        <span className="text-red-500 text-4xl font-serif">"</span>
-      </div>
-      <p className="text-zinc-300 text-lg leading-relaxed mb-8 group-hover:text-white transition-colors duration-300">
-        {testimonial.content}
-      </p>
-      <div className="border-t border-zinc-800 pt-6">
-        <p className="font-semibold text-zinc-200">{testimonial.author}</p>
-        <p className="text-sm text-zinc-500">{testimonial.age} • {testimonial.role}</p>
+  <Card className="w-full max-w-3xl mx-auto bg-gradient-to-br from-zinc-900/95 to-black overflow-hidden 
+    group hover:shadow-[0_0_40px_rgba(239,68,68,0.15)] transition-all duration-500 ease-out
+    hover:-translate-y-1 cursor-pointer">
+    <CardContent className="p-8 md:p-12 relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-red-600/0 opacity-0 
+        group-hover:opacity-5 transition-opacity duration-500 ease-out" />
+      
+      <div className="flex flex-col md:flex-row items-start gap-8 relative">
+        <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0 transition-transform duration-500 
+          group-hover:scale-105">
+          <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-600 rounded-full blur opacity-70 
+            group-hover:opacity-90 transition-opacity duration-500" />
+          <img
+            src={testimonial.image}
+            alt={testimonial.author}
+            className="w-full h-full rounded-full object-cover border-4 border-red-500 relative z-10 
+              group-hover:border-red-400 transition-colors duration-500"
+          />
+        </div>
+        <div className="flex-1 relative">
+          <Quote 
+            size={40} 
+            className="text-red-500/20 mb-4 transform transition-all duration-500 
+              group-hover:scale-110 group-hover:text-red-500/30 group-hover:rotate-6" 
+          />
+          <p className="text-gray-300 text-lg md:text-xl leading-relaxed mb-6 transition-colors duration-500 
+            group-hover:text-white">
+            "{testimonial.content}"
+          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="font-semibold text-white text-lg md:text-xl transition-transform duration-500 
+                  group-hover:translate-x-1">
+                  {testimonial.author}
+                </h4>
+                <CheckCircle2 size={20} className="text-red-500 transition-all duration-500 
+                  group-hover:scale-110 group-hover:text-red-400" />
+              </div>
+              <p className="text-gray-400 text-sm md:text-base mt-1 transition-colors duration-500 
+                group-hover:text-gray-300">{testimonial.role}</p>
+            </div>
+            <div className="flex flex-col items-end">
+              <div className="flex items-center gap-1 mb-2">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <Star
+                    key={i}
+                    size={16}
+                    className="fill-red-500 text-red-500 transition-all duration-500 
+                      group-hover:scale-110 group-hover:rotate-[360deg] hover:text-red-400 
+                      hover:fill-red-400"
+                    style={{ transitionDelay: `${i * 50}ms` }}
+                  />
+                ))}
+              </div>
+              <span className="text-sm text-gray-500 transition-colors duration-500 
+                group-hover:text-gray-400">{testimonial.date}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </CardContent>
   </Card>
 );
 
-const MobileSlider = ({ testimonials }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
-
-  const handleTouchStart = (e) => setTouchStart(e.targetTouches[0].clientX);
-  const handleTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
-  const handleTouchEnd = () => {
-    const swipeThreshold = 50;
-    if (touchStart - touchEnd > swipeThreshold) {
-      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-    }
-    if (touchEnd - touchStart > swipeThreshold) {
-      setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-    }
-  };
-
-  return (
-    <div className="relative overflow-hidden">
-      <div
-        className="flex transition-transform duration-300 ease-out"
-        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        {testimonials.map((testimonial, index) => (
-          <div key={index} className="min-w-full px-6">
-            <TestimonialCard testimonial={testimonial} />
-          </div>
-        ))}
-      </div>
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3">
-        {testimonials.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentIndex(index)}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              index === currentIndex ? "w-8 bg-red-600" : "w-4 bg-zinc-600"
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-function Step({ number, title, description, image }) {
-  return (
-    <div className="flex flex-col items-center text-center space-y-4">
-      <img
-        src={image}
-        alt={title}
-        className="w-full h-40 object-contain rounded-lg"
-      />
-      <div className="text-red-500 text-2xl font-bold">Step {number}</div>
-      <h3 className="text-xl font-semibold text-white">{title}</h3>
-      <p className="text-zinc-300">{description}</p>
-    </div>
-  );
-}
-
-
 const TestimonialSection = () => {
-  const [displayedTestimonials, setDisplayedTestimonials] = useState([]);
-  const [isClient, setIsClient] = useState(false);
+  const [testimonialsList, setTestimonialsList] = useState(testimonials);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const intervalRef = useRef(null);
 
   useEffect(() => {
-    setIsClient(true);
-    setDisplayedTestimonials(shuffle([...testimonials]));
+    setTestimonialsList(shuffle([...testimonials]));
+    startAutoSlide();
+    return () => clearInterval(intervalRef.current);
   }, []);
 
-  if (!isClient) return null;
+  const startAutoSlide = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    intervalRef.current = setInterval(() => {
+      handleNext();
+    }, 8000);
+  };
+
+  const handlePrev = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + testimonialsList.length) % testimonialsList.length);
+    startAutoSlide();
+    setTimeout(() => setIsAnimating(false), 500);
+  };
+
+  const handleNext = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonialsList.length);
+    startAutoSlide();
+    setTimeout(() => setIsAnimating(false), 500);
+  };
+
+  const handleShareExperience = () => {
+    const contactSection = document.getElementById('contact');
+    contactSection?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  if (testimonialsList.length === 0) return null;
 
   return (
-    <div className="bg-gradient-to-b from-black to-zinc-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+    <section className="relative bg-black py-32 overflow-hidden">
+      <div className="absolute inset-0 bg-[url('https://img.freepik.com/free-photo/mechanics-repairing-car-workshop_329181-11791.jpg?t=st=1732637364~exp=1732640964~hmac=b89708339a4eabb4f367ad247d6a10ce8416712c51ae9c4f8600590ce484d346&w=826')] opacity-5 bg-fixed bg-no-repeat bg-cover bg-center" />
+      <div className="absolute inset-0 bg-gradient-to-br from-red-600/5 via-black/50 to-black pointer-events-none" />
+
+      <div className="container mx-auto px-4 relative">
         <div className="max-w-3xl mx-auto text-center mb-20">
-          <h2 className="text-5xl font-bold text-white mb-6 leading-tight">
-            What Our Customers Are Saying
+          <h2 className="text-6xl sm:text-7xl font-bold mb-8">
+            <span className="bg-gradient-to-r from-white via-red-500 to-white font-cursive bg-clip-text text-transparent">
+              Client Stories
+            </span>
           </h2>
-          <p className="text-xl text-zinc-400">
-            Real experiences from people who trust our service
+          <p className="text-xl text-gray-400 leading-relaxed">
+            Join thousands of satisfied customers who trust our expertise in vehicle inspection. 
+            Your safety and satisfaction are our top priorities.
           </p>
         </div>
 
-        <div className="md:hidden mb-20">
-          <MobileSlider testimonials={displayedTestimonials} />
-        </div>
-
-        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
-          {displayedTestimonials.map((testimonial) => (
-            <TestimonialCard key={testimonial.author} testimonial={testimonial} />
-          ))}
-        </div>
-
-        <div className="max-w-lg mx-auto text-center mb-24">
-          <div className="bg-red-950/30 backdrop-blur-sm rounded-2xl p-10 border border-red-800/30">
-            <h3 className="text-3xl font-bold text-white mb-4">Share Your Story</h3>
-            <p className="text-zinc-300 mb-8">
-              Join our community and help others make informed decisions
-            </p>
-            <button className="w-full bg-red-600 text-white py-4 rounded-xl text-lg font-semibold hover:bg-red-700 transition-all duration-300 hover:-translate-y-1">
-              Share Your Experience
+        <div className="relative">
+          <div className="overflow-hidden">
+            <div 
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+            >
+              {testimonialsList.map((testimonial) => (
+                <div 
+                  key={testimonial.author}
+                  className="w-full flex-shrink-0"
+                >
+                  <TestimonialCard testimonial={testimonial} />
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="flex justify-center mt-8 gap-4">
+            <button
+              onClick={handlePrev}
+              disabled={isAnimating}
+              className="bg-red-500/20 hover:bg-red-500/40 text-white p-3 rounded-full transition-all duration-300 
+                focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Previous testimonial"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={isAnimating}
+              className="bg-red-500/20 hover:bg-red-500/40 text-white p-3 rounded-full transition-all duration-300 
+                focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Next testimonial"
+            >
+              <ChevronRight size={24} />
             </button>
           </div>
         </div>
 
-        <div className="max-w-3xl mx-auto">
-  <h2 className="text-3xl font-bold text-center text-white mb-12">
-    How It Works
-  </h2>
-  <div className=" p-6">
-    <div className="grid md:grid-cols-2 gap-6">
-      <Step 
-        number="1"
-        title="Enter Vehicle Details"
-        description="Provide your VIN or license plate for a thorough analysis of your vehicle's history."
-        image="https://i.ibb.co/Bzjrb2w/c82c0c6a-0d9d-4fa6-870e-7059438b2ce6-768x179-removebg-preview-2.png"
-      />
-      <Step
-        number="2"
-        title="Get Your Report"
-        description="Receive a comprehensive report detailing your vehicle's complete history."
-        image="https://i.ibb.co/wWrfyjJ/image-removebg-preview-4.png"
-      />
-    </div>
-  </div>
-</div>
-
+        <div className="text-center mt-20 relative">
+          <div className="absolute inset-x-0 -top-20 h-40 bg-gradient-to-b from-transparent to-black pointer-events-none" />
+          <button
+            onClick={handleShareExperience}
+            className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-red-600 to-red-500 
+              text-white px-8 py-4 rounded-xl text-lg font-semibold overflow-hidden
+              transition-all duration-300 hover:shadow-[0_0_30px_rgba(220,38,38,0.3)] 
+              transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+          >
+            <span className="relative z-10">Share Your Experience</span>
+            <MessageCircle 
+              size={20} 
+              className="relative z-10 transform group-hover:rotate-12 transition-transform duration-300" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-red-600 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+          </button>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 

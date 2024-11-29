@@ -75,7 +75,7 @@ const Header = () => {
             strokeWidth={1.5}
           />
           <div className="font-extrabold text-2xl md:text-4xl tracking-tight text-red-500 font-['Montserrat']">
-            LuxuryCars
+            Vehicle Info
           </div>
         </Link>
         
